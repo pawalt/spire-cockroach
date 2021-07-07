@@ -1,0 +1,44 @@
+version: '3'
+services:
+  # Root
+  root-server:
+    image: gcr.io/spiffe-io/spire-server:0.12.3
+    volumes:
+      - ./conf/server:/opt/spire/conf/server
+      - ./data/server:/opt/spire/data
+    command: ["-config", "/opt/spire/conf/server/server.conf"]
+  root-agent:
+    # Share the host pid namespace so this agent can attest the nested servers
+    pid: "host"
+    image: gcr.io/spiffe-io/spire-agent:0.12.3
+    depends_on: ["root-server"]
+    volumes:
+      # Share root-agent socket to be accessed by nested servers
+      - ./sharedRootSocket:/opt/spire/sockets
+      - ./conf/agent:/opt/spire/conf/agent
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["-config", "/opt/spire/conf/agent/agent.conf"]
+  roachfirst:
+    build:
+      context: .
+      dockerfile: Dockerfile.roach
+    depends_on: ["root-agent"]
+    volumes:
+      - ./sharedRootSocket:/opt/spire/sockets
+      - ./conf/roach:/conf
+    entrypoint: "spiffe-helper"
+    command: ["-config", "/conf/spiffe-helper.conf"]
+    labels:
+      app: roachfirst
+  clientfirst:
+    build:
+      context: .
+      dockerfile: Dockerfile.roach
+    depends_on: ["roachfirst"]
+    volumes:
+      - ./sharedRootSocket:/opt/spire/sockets
+      - ./conf/client:/conf
+    entrypoint: "spiffe-helper"
+    command: ["-config", "/conf/spiffe-helper.conf"]
+    labels:
+      app: clientfirst

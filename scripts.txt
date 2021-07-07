@@ -1,0 +1,16 @@
+
+/opt/spire/bin/spire-server entry create \
+    -parentID spiffe://example.org/spire/agent/x509pop/4b45c7c788f2ed572fa5aef7c39cbe2fd0523d78 \
+    -spiffeID spiffe://example.org/workload/roachfirst \
+    -dns roachfirst \
+    -dns roachfirst.example.org \
+    -selector docker:label:app:roachfirst
+
+/opt/spire/bin/spire-server entry create \
+    -parentID spiffe://example.org/spire/agent/x509pop/4b45c7c788f2ed572fa5aef7c39cbe2fd0523d78 \
+    -spiffeID spiffe://example.org/workload/clientfirst \
+    -dns peyton \
+    -dns root \
+    -selector docker:label:app:clientfirst
+
+cockroach sql --url=postgres://roachfirst:26257/?sslmode=verify-full&sslrootcert=certs/ca.crt&sslcert=certs/client.peyton.crt&sslkey=certs/client.peyton.key&sslmode=verify-full

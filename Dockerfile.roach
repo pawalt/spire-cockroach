@@ -1,0 +1,19 @@
+FROM ubuntu:bionic
+
+RUN apt update && apt install wget -y
+
+RUN mkdir hack && cd hack \
+    && wget https://github.com/spiffe/spiffe-helper/releases/download/0.5/spiffe-helper-0.5-Linux-x86_64.tar.gz \
+    && tar xf spiffe-helper-0.5-Linux-x86_64.tar.gz \
+    && mv spiffe-helper /usr/bin \
+    && cd .. && rm -rf hack
+
+RUN mkdir hack && cd hack \
+    && wget https://binaries.cockroachdb.com/cockroach-v21.1.3.linux-amd64.tgz \
+    && tar xf cockroach-v21.1.3.linux-amd64.tgz \
+    && mv cockroach-v21.1.3.linux-amd64/cockroach /usr/bin  \
+    && cd .. && rm -rf hack
+
+RUN mkdir -p /app/certs
+
+WORKDIR /app
