@@ -9,7 +9,7 @@ While the cli-based solution works fine for quickly generating user certs, it ha
 
 ## SPIFFE/SPIRE
 
-These problems not unique to Cockroach, so open source projects already exist to address them:
+These problems are not unique to Cockroach, so open source projects already exist to address them:
 
 - [SPIFFE](https://spiffe.io/docs/latest/spiffe-about/overview/) is an open standard for production identity based on x509 (and later JWT). It defines a spec for x509 certificates that revolves around a [SPIFFE ID](https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/#spiffe-id), a universal identifier for a workload.
 - [SPIRE](https://spiffe.io/docs/latest/spire-about/) is an implementation of SPIFFE that allows workloads to "attest" to their identity using metadata like docker labels, kubernetes pod info, AWS metadata, etc. Once attestation has succeeded, SPIRE mints SPIFFE-compliant certificates and distributes them to the workloads.
@@ -119,4 +119,4 @@ Time: 5ms total (execution 5ms / network 0ms)
 root@roachfirst:26257/defaultdb> 
 ```
 
-With that, we have a client connecting to Cockroach with credentials minted and distributed by SPIRE! As you might have notice, we didn't have to touch certificates a single time during that process - thanks to the mechanisms in SPIRE, all certificates have been distributed and will even be rotated when their time is up.
+With that, we have a client connecting to Cockroach with credentials minted and distributed by SPIRE! As you might have noticed, we didn't have to touch certificates a single time during that process - thanks to the mechanisms in SPIRE, all certificates have been distributed and will even be rotated when their time is up.
