@@ -79,6 +79,8 @@ Removing network spire-roach_default
 
 In these commands, the `parentID` specifies what agent is allowed to attest the specified workload. That x509 SPIFFE ID was created because we used the [x509pop node attestor](https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_x509pop.md) to attest our agent. In a production setting, all agent attestation would happen via selectors that look more meaninful (and don't require extra certificate minting) like AWS IIDs, K8s SATs, etc.
 
+Also note the `-dns` flag. This specifies the common name and DNS SAN for our workloads. **This is the piece of metadata that Cockroach uses to map certificates to users and nodes.**
+
 Now that we've got our registration entries in, we can start up the whole system:
 
 ```
@@ -120,3 +122,15 @@ root@roachfirst:26257/defaultdb>
 ```
 
 With that, we have a client connecting to Cockroach with credentials minted and distributed by SPIRE! As you might have noticed, we didn't have to touch certificates a single time during that process - thanks to the mechanisms in SPIRE, all certificates have been distributed and will even be rotated when their time is up.
+
+## Conclusion
+
+While this example only shows an example of connecting a client to cockroach, this method of certificate distribution can be used with multi-node and multi-client setups. In fact, the use case is much more convincing with large setups. The overhead of managing SPIRE only becomes worth it at scale.
+
+## Future Work
+
+Currently, Cockroach maps certificates to users via the CN or DNS SANs in the certificate. SPIRE, however, makes no uniqueness guarantee about DNS SANs the way it does for SPIFFE IDs. This means that following attack vector is possible:
+
+If multiple clusters share a SPIRE server as a source of truth (as they should) and have overlapping usernames, then clients meant to connect to only one cluster can connect to any clusters that accept that username.
+
+To fix this, Cockroach could add logic to map certificates to users off SPIFFE ID rather than DNS SANs. The uniqueness guarantees on SPIFFE IDs would remove the possibility of certificates being reused in clusters that they are not meant for.
