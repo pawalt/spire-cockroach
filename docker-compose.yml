@@ -19,6 +19,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: ["-config", "/opt/spire/conf/agent/agent.conf"]
   roachfirst:
+    hostname: roachfirst
     build:
       context: .
       dockerfile: Dockerfile.roach
@@ -31,6 +32,7 @@ services:
     labels:
       app: roachfirst
   clientfirst:
+    hostname: clientfirst
     build:
       context: .
       dockerfile: Dockerfile.roach
