@@ -16,6 +16,18 @@ These problems are not unique to Cockroach, so open source projects already exis
 
 Using SPIFFE/SPIRE, we can cut out all `cockroach cert` commands and operate the cluster using only the identities (SPIFFE x509 certificates) issued to us via SPIRE. This is a drastic decrease in operator overhead as all certificate minting and distribution is now automated.
 
+## SPIFFE Value Proposition
+
+The primary value proposition of SPIFFE generally is that it allows for a "universal identity" to be used across all auth systems.
+
+Starting at the database, a SPIFFE integration would help solve certificate minting and distribution problems for both nodes and clients. Adding support for nodes to connect to a SPIFFE workload API and authenticate based on SPIFFE IDs would obviate the need for nodes to generate certificates, create join tokens, etc, giving us auth boostrapping for free. Nodes would receive their [SVIDs](https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/#spiffe-verifiable-identity-document-svid) (SPIFFE x509 certificates) on startup, and they would immediately be able to authenticate with each other.
+
+This benefit applies to clients as well - any client with an SVID would be able to authenticate with the database with no manual `cockroach cert` steps.
+
+More widely, a SPIFFE integration would greatly simplify the integration of Cockroach for customers already using SPIFFE as the identity standard for their infrastructure. For these customers, setting up TLS auth becomes as simple as pointing Cockroach at their SPIFFE workload API. They can then immediately authenticate from any of their existing services to the database.
+
+Note that the primary drawback of SPIFFE is the infrastructure required for it. Using SPIFFE requires having a workload API (usually [SPIRE](https://spiffe.io/docs/latest/spire-about/)) spun up. This is extra overhead at the start, but in cases where many node/client certificates need to be managed, the overhead pays off with scale.
+
 ## Demo
 
 In this demo, we have 4 containers:
